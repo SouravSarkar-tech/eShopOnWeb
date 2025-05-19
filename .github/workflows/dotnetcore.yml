@@ -140,7 +140,7 @@ jobs:
               }
               
               # Copy files with explicit Admin rights
-              Copy-Item '$source\*' '$destination' -Recurse -Force
+              Copy-Item '$source\*' '$destination' -Recurse -Force 2>&1
             `"" -Wait
         shell: powershell
 
