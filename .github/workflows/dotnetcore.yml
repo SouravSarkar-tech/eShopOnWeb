@@ -108,7 +108,7 @@ jobs:
         run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
 
       - name: Publish Web project
-        run: dotnet publish ./src/Web/Web.csproj --configuration Release --no-build --output published-app
+        run: dotnet publish ./src/Web/Web.csproj --configuration Release --no-build --output published-app --self-contained
 
       # - name: Publish all projects in solution
       #   run: |
