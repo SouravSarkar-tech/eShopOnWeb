@@ -112,13 +112,15 @@ jobs:
 
       - name: Publish all projects in solution
         run: |
-             $projects = Get-Content ./eShopOnWeb.sln | Where-Object { $_ -match '^Project\(.*\) = ' } |
+            $projects = Get-Content ./eShopOnWeb.sln | Where-Object { $_ -match '^Project\(.*\) = ' } |
                         ForEach-Object { ($_ -split ',')[1].Trim().Trim('"') }
         
-             foreach ($proj in $projects) {
-              dotnet publish $proj --configuration Release --no-build --output "published-app\$(Split-Path $proj -LeafBase)"
-             }
+            foreach ($proj in $projects) {
+              $projectName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
+              dotnet publish $proj --configuration Release --no-build --output "published-app\$projectName"
+            }
         shell: powershell
+
 
       - name: Stop IIS site
         run: |
