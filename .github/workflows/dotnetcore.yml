@@ -130,7 +130,7 @@ jobs:
       - name: Copy files to IIS directory
         run: |
             $source = "$(pwd)\published-app"
-            $destination = "${env:SystemDrive}\inetpub\wwwroot"
+            $destination = "C:\inetpub\wwwroot"
             
             # Run with elevated permissions using Start-Process
             Start-Process powershell -Verb RunAs -ArgumentList "-Command `"
