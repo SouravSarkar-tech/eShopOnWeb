@@ -108,7 +108,7 @@ jobs:
         run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
 
       - name: Publish Web project
-        run: dotnet publish ./src/Web/Web.csproj --configuration Release --output published-app
+        run: dotnet publish --configuration Release --no-build --output published-app
 
       - name: Stop IIS site
         run: |
