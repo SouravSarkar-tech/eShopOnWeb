@@ -65,7 +65,7 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Publish the application
-      run: dotnet publish ./eShopOnWeb.sln --configuration Release --output ./publish
+      run: dotnet publish ./src/Web/Web.csproj --configuration Release --output ./publish
 
     - name: Create zip archive
       run: zip -r publish.zip ./publish
