@@ -52,43 +52,85 @@ on: [push, pull_request, workflow_dispatch]
 #       env:
 #         INPUT_FILE: ./publish.zip
 
+# jobs:
+#   build-and-deploy:
+#     runs-on: self-hosted
+
+#     steps:
+#     - uses: actions/checkout@v2
+
+#     - name: Setup .NET
+#       uses: actions/setup-dotnet@v1
+#       with:
+#         dotnet-version: '8.0.x'
+
+#     - name: Publish the application
+#       run: dotnet publish ./src/Web/Web.csproj --configuration Release --output ./publish
+
+#     - name: Create zip archive
+#       run: zip -r publish.zip ./publish
+
+#     - name: Upload to EC2 via SCP
+#       uses: appleboy/scp-action@v0.1.3
+#       with:
+#         host: ${{ secrets.EC2_HOST }}
+#         username: ${{ secrets.EC2_USERNAME }}
+#         key: ${{ secrets.EC2_SSH_KEY }}
+#         port: 22
+#         source: "publish.zip"
+#         target: "C:/Temp"
+
+#     - name: Deploy via SSH
+#       uses: appleboy/ssh-action@v1.0.0
+#       with:
+#         host: ${{ secrets.EC2_HOST }}
+#         username: ${{ secrets.EC2_USERNAME }}
+#         key: ${{ secrets.EC2_SSH_KEY }}
+#         port: 22
+#         script: |
+#           Stop-WebAppPool -Name "DefaultAppPool"
+#           Remove-Item -Recurse -Force "C:\inetpub\wwwroot\*"
+#           Expand-Archive -Path "C:\Temp\publish.zip" -DestinationPath "C:\inetpub\wwwroot"
+#           Start-WebAppPool -Name "DefaultAppPool"
+
+
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
-
+    runs-on: self-hosted  # Make sure this matches the label of your Windows runner
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Publish the application
-      run: dotnet publish ./src/Web/Web.csproj --configuration Release --output ./publish
+      - name: Restore dependencies
+        run: dotnet restore ./eShopOnWeb.sln
 
-    - name: Create zip archive
-      run: zip -r publish.zip ./publish
+      - name: Build solution
+        run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
 
-    - name: Upload to EC2 via SCP
-      uses: appleboy/scp-action@v0.1.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        source: "publish.zip"
-        target: "C:/Temp"
+      - name: Publish Web project
+        run: dotnet publish ./src/Web/Web.csproj --configuration Release --output published-app
 
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          Stop-WebAppPool -Name "DefaultAppPool"
-          Remove-Item -Recurse -Force "C:\inetpub\wwwroot\*"
-          Expand-Archive -Path "C:\Temp\publish.zip" -DestinationPath "C:\inetpub\wwwroot"
-          Start-WebAppPool -Name "DefaultAppPool"
+      - name: Stop IIS site
+        run: |
+          Import-Module WebAdministration
+          Stop-Website -Name "Default Web Site"
+        shell: pwsh
+
+      - name: Copy files to IIS directory
+        run: |
+          $source = "$(pwd)\published-app"
+          $destination = "${env:SystemDrive}\inetpub\wwwroot"
+          Remove-Item "$destination\*" -Recurse -Force
+          Copy-Item "$source\*" "$destination" -Recurse
+        shell: pwsh
+
+      - name: Start IIS site
+        run: |
+          Import-Module WebAdministration
+          Start-Website -Name "Default Web Site"
+        shell: pwsh
