@@ -108,7 +108,7 @@ jobs:
         run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
 
       - name: Publish Web project
-        run: dotnet publish ./src/Web/Web.csproj --configuration Release --no-build --output published-app --self-contained
+        run: dotnet publish ./src/Web/Web.csproj --configuration Release --no-build --output published-app 
 
       # - name: Publish all projects in solution
       #   run: |
@@ -154,6 +154,12 @@ jobs:
               # Copy files with explicit Admin rights
               Copy-Item '$source\*' '$destination' -Recurse -Force 2>&1
             `"" -Wait
+        shell: powershell
+
+      - name: Restart IIS Application Pool
+        run: |
+            Import-Module WebAdministration
+            Restart-WebAppPool -Name "DefaultAppPool"
         shell: powershell
 
       - name: Start IIS site
