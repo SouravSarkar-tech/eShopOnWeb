@@ -98,34 +98,34 @@ jobs:
   build-and-deploy:
     runs-on: self-hosted  # Ensure this matches your Windows runner's label
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # - name: Checkout code
+      #   uses: actions/checkout@v3
 
-      - name: Restore dependencies
-        run: dotnet restore ./eShopOnWeb.sln
+      # - name: Restore dependencies
+      #   run: dotnet restore ./eShopOnWeb.sln
 
-      - name: Build solution
-        run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
+      # - name: Build solution
+      #   run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
 
-      - name: Publish Web project
-        run: dotnet publish ./src/Web/Web.csproj --configuration Release --output published-app
+      # - name: Publish Web project
+      #   run: dotnet publish ./src/Web/Web.csproj --configuration Release --output published-app
 
-      - name: Stop IIS site
-        run: |
-          # Run with elevated permissions
-          Start-Process powershell -Verb RunAs -ArgumentList @"
-            Import-Module WebAdministration
-            Stop-Website -Name "Default Web Site" -ErrorAction SilentlyContinue
-          "@
-        shell: powershell
+      # - name: Stop IIS site
+      #   run: |
+      #     # Run with elevated permissions
+      #     Start-Process powershell -Verb RunAs -ArgumentList @"
+      #       Import-Module WebAdministration
+      #       Stop-Website -Name "Default Web Site" -ErrorAction SilentlyContinue
+      #     "@
+      #   shell: powershell
         
-      - name: Copy files to IIS directory
-        run: |
-          $source = "$(pwd)\published-app"
-          $destination = "${env:SystemDrive}\inetpub\wwwroot"
-          Remove-Item "$destination\*" -Recurse -Force -ErrorAction SilentlyContinue
-          Copy-Item "$source\*" "$destination" -Recurse
-        shell: powershell
+      # - name: Copy files to IIS directory
+      #   run: |
+      #     $source = "$(pwd)\published-app"
+      #     $destination = "${env:SystemDrive}\inetpub\wwwroot"
+      #     Remove-Item "$destination\*" -Recurse -Force -ErrorAction SilentlyContinue
+      #     Copy-Item "$source\*" "$destination" -Recurse
+      #   shell: powershell
         
       - name: Start IIS site
         run: |
