@@ -112,10 +112,13 @@ jobs:
 
       - name: Stop IIS site
         run: |
-          Import-Module WebAdministration
-          Stop-Website -Name "Default Web Site"
+          # Run with elevated permissions
+          Start-Process powershell -Verb RunAs -ArgumentList @"
+            Import-Module WebAdministration
+            Stop-Website -Name "Default Web Site" -ErrorAction SilentlyContinue
+          "@
         shell: powershell
-
+        
       - name: Copy files to IIS directory
         run: |
           $source = "$(pwd)\published-app"
@@ -123,9 +126,12 @@ jobs:
           Remove-Item "$destination\*" -Recurse -Force -ErrorAction SilentlyContinue
           Copy-Item "$source\*" "$destination" -Recurse
         shell: powershell
-
+        
       - name: Start IIS site
         run: |
-          Import-Module WebAdministration
-          Start-Website -Name "Default Web Site"
+          # Run with elevated permissions
+          Start-Process powershell -Verb RunAs -ArgumentList @"
+            Import-Module WebAdministration
+            Start-Website -Name "Default Web Site"
+          "@
         shell: powershell
