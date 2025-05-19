@@ -114,7 +114,7 @@ jobs:
         run: |
           Import-Module WebAdministration
           Stop-Website -Name "Default Web Site"
-        shell: pwsh
+        shell: powershell
 
       - name: Copy files to IIS directory
         run: |
@@ -122,10 +122,10 @@ jobs:
           $destination = "${env:SystemDrive}\inetpub\wwwroot"
           Remove-Item "$destination\*" -Recurse -Force -ErrorAction SilentlyContinue
           Copy-Item "$source\*" "$destination" -Recurse
-        shell: pwsh
+        shell: powershell
 
       - name: Start IIS site
         run: |
           Import-Module WebAdministration
           Start-Website -Name "Default Web Site"
-        shell: pwsh
+        shell: powershell
