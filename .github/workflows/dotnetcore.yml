@@ -119,7 +119,7 @@ jobs:
           "@
         shell: powershell
         
-      # - name: Copy files to IIS directory
+      # - name: Copy files to IIS directory   ####
       #   run: |
       #     $source = "$(pwd)\published-app"
       #     $destination = "${env:SystemDrive}\inetpub\wwwroot"
