@@ -107,19 +107,19 @@ jobs:
       - name: Build solution
         run: dotnet build ./eShopOnWeb.sln --configuration Release --no-restore
 
-      # - name: Publish Web project
-      #   run: dotnet publish --configuration Release --no-build --output published-app
+      - name: Publish Web project
+        run: dotnet publish ./src/Web/Web.csproj --configuration Release --no-build --output published-app
 
-      - name: Publish all projects in solution
-        run: |
-            $projects = Get-Content ./eShopOnWeb.sln | Where-Object { $_ -match '^Project\(.*\) = ' } |
-                        ForEach-Object { ($_ -split ',')[1].Trim().Trim('"') }
+      # - name: Publish all projects in solution
+      #   run: |
+      #       $projects = Get-Content ./eShopOnWeb.sln | Where-Object { $_ -match '^Project\(.*\) = ' } |
+      #                   ForEach-Object { ($_ -split ',')[1].Trim().Trim('"') }
         
-            foreach ($proj in $projects) {
-              $projectName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
-              dotnet publish $proj --configuration Release --no-build --output "published-app\$projectName"
-            }
-        shell: powershell
+      #       foreach ($proj in $projects) {
+      #         $projectName = [System.IO.Path]::GetFileNameWithoutExtension($proj)
+      #         dotnet publish $proj --configuration Release --no-build --output "published-app\$projectName"
+      #       }
+      #   shell: powershell
 
 
       - name: Stop IIS site
