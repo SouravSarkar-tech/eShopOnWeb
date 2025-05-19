@@ -96,22 +96,22 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted  # Make sure this matches the label of your Windows runner
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-          install-dir: 'C:\Users\Administrator\actions-runner\dotnet'
+      - name: Manually install .NET SDK to a writable directory
+        shell: pwsh
+        run: |
+          $installPath = "C:\Users\Administrator\actions-runner\dotnet"
+          Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
+          ./dotnet-install.ps1 -Version 8.0.100 -InstallDir $installPath
 
       - name: Add .NET to PATH
-        run: |
-            echo "C:\Users\Administrator\actions-runner\dotnet" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
         shell: pwsh
-
+        run: |
+          echo "C:\Users\Administrator\actions-runner\dotnet" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
 
       - name: Restore dependencies
         run: dotnet restore ./eShopOnWeb.sln
