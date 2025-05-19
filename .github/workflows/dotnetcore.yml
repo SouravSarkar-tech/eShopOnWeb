@@ -2,21 +2,52 @@ name: eShopOnWeb Build and Test
 
 on: [push, pull_request, workflow_dispatch]
 
-jobs:
-  build:
+# jobs:
+#   build:
 
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Setup .NET
+#       uses: actions/setup-dotnet@v1
+#       with:
+#         dotnet-version: '8.0.x'
+#         include-prerelease: true
+
+#     - name: Build with dotnet
+#       run: dotnet build ./eShopOnWeb.sln --configuration Release
+    
+#     - name: Test with dotnet
+#       run: dotnet test ./eShopOnWeb.sln --configuration Release
+
+jobs:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '8.0.x'
-        include-prerelease: true
 
-    - name: Build with dotnet
-      run: dotnet build ./eShopOnWeb.sln --configuration Release
-    
-    - name: Test with dotnet
-      run: dotnet test ./eShopOnWeb.sln --configuration Release
+    - name: Publish the application
+      run: dotnet publish ./eShopOnWeb.sln --configuration Release --output ./publish
+
+    - name: Compress published output
+      run: zip -r publish.zip ./publish
+
+    - name: Copy artifact to EC2 via WinRM
+      uses: gsoft-inc/psrp@v1.0.1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        password: ${{ secrets.EC2_PASSWORD }}
+        port: 5986
+        script: |
+          Expand-Archive -Path C:\Temp\publish.zip -DestinationPath 'C:\inetpub\wwwroot' -Force
+          Write-Output "Deployment Complete"
+      env:
+        INPUT_FILE: ./publish.zip
